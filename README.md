@@ -5,7 +5,7 @@ A single-page, interactive infographic comparing **six pre-trained models** acro
 that actually govern deployment: **size, accuracy, and speed**, plus interpretability,
 The consideration that matters most when a decision has to be explained.
 
-🔗 **Live page:** `https://nicoolesy.github.io/pretrained-model-tradeoffs/`
+🔗 **Live page:** [View it here](https://nicoolesy.github.io/pretrained-model-tradeoffs/)
 
 ---
 
