@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Picking the Right Pre-Trained Model — Portfolio Artifact Vol. 04</title>
+<meta name="description" content="A decision matrix comparing six pre-trained models across NLP/Generative AI, Computer Vision, and Tabular domains on size, accuracy, and speed." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700;1,900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=Crimson+Pro:ital,wght@1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --cream:#ECE5D6;
+    --cream-panel:#E6DDC9;
+    --cream-deep:#E1D7C0;
+    --ink:#1C1714;
+    --ink-soft:#4A423A;
+    --oxblood:#9C2B26;
+    --muted:#6B6258;
+    --hairline:#C8BCA3;
+    --hairline-soft:#D6CCB6;
+    /* domain accents — echoing the Vol. 03 phase dots */
+    --nlp:#2F5C8F;     /* blue   */
+    --vision:#B4862A;  /* amber  */
+    --tabular:#3E7A4E; /* green  */
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background-color:var(--cream);
+    background-image:radial-gradient(var(--hairline) 0.9px, transparent 0.9px);
+    background-size:22px 22px;
+    color:var(--ink);
+    font-family:"Source Serif 4", Georgia, serif;
+    font-size:18px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 40px;}
+
+  /* ---- shared label / mono utility ---- */
+  .mono{
+    font-family:"JetBrains Mono","Space Mono",monospace;
+    font-size:12px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .num{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--ink);}
+
+  /* ---- top bar ---- */
+  header.topbar{
+    border-bottom:1px solid var(--ink);
+    padding:24px 0 18px;
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    flex-wrap:wrap;
+  }
+  .topbar .eyebrow{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink);}
+  .topbar .vol{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+
+  /* ---- hero ---- */
+  .hero{padding:64px 0 30px;}
+  .hero h1{
+    font-family:"Playfair Display",serif;
+    font-weight:900;
+    font-size:clamp(48px,9vw,116px);
+    line-height:0.95;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .hero h1 .accent{
+    color:var(--oxblood);
+    font-style:italic;
+    font-weight:700;
+    display:block;
+  }
+  .hero .dek{
+    font-family:"Crimson Pro",serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:clamp(20px,2.6vw,30px);
+    line-height:1.4;
+    color:var(--ink-soft);
+    max-width:640px;
+    margin:34px 0 0;
+  }
+
+  /* ---- stat strip ---- */
+  .statstrip{
+    display:flex;flex-wrap:wrap;gap:10px 0;
+    align-items:center;
+    margin:44px 0 0;
+    font-family:"JetBrains Mono",monospace;
+    font-size:13px;letter-spacing:0.04em;
+  }
+  .statstrip .stat{padding-right:22px;color:var(--muted);text-transform:uppercase;}
+  .statstrip .stat b{color:var(--ink);font-weight:700;}
+  .statstrip .sep{color:var(--hairline);padding-right:22px;}
+  .rule{border:none;border-top:1px solid var(--ink);margin:30px 0 0;}
+  .rule.dotted{border-top:1px dotted var(--hairline);}
+
+  /* ---- filter panel ---- */
+  .filterpanel{
+    background:var(--cream-panel);
+    border:1px solid var(--hairline);
+    border-radius:14px;
+    padding:26px 28px 24px;
+    margin:34px 0 0;
+  }
+  .filterpanel .ftitle{margin:0 0 16px;}
+  .pills{display:flex;flex-wrap:wrap;gap:10px;}
+  .pill{
+    display:inline-flex;align-items:center;gap:10px;
+    background:var(--ink);color:var(--cream);
+    border:1px solid var(--ink);
+    border-radius:999px;
+    padding:11px 18px 11px 15px;
+    font-family:"JetBrains Mono",monospace;
+    font-size:12px;letter-spacing:0.1em;text-transform:uppercase;font-weight:500;
+    cursor:pointer;
+    transition:background .18s ease, color .18s ease, opacity .18s ease;
+    user-select:none;
+  }
+  .pill .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto;background:var(--cream);}
+  .pill[data-domain="all"] .dot{background:var(--cream);}
+  .pill[data-domain="nlp"] .dot{background:var(--nlp);}
+  .pill[data-domain="vision"] .dot{background:var(--vision);}
+  .pill[data-domain="tabular"] .dot{background:var(--tabular);}
+  .pill[aria-pressed="false"]{background:transparent;color:var(--ink);}
+  .pill[aria-pressed="false"] .dot{box-shadow:inset 0 0 0 1px var(--ink);}
+  .pill:focus-visible{outline:2px solid var(--oxblood);outline-offset:3px;}
+  .filterhint{margin:14px 0 0;font-style:italic;color:var(--muted);font-family:"Crimson Pro",serif;font-size:16px;}
+
+  /* ---- section markers ---- */
+  section.block{padding:62px 0 0;}
+  .marker{display:flex;align-items:baseline;gap:14px;margin:0 0 8px;}
+  .marker .sig{font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:0.12em;color:var(--oxblood);font-weight:700;}
+  .marker .label{font-family:"JetBrains Mono",monospace;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);}
+  .block h2{
+    font-family:"Playfair Display",serif;font-weight:700;
+    font-size:clamp(28px,4.4vw,46px);line-height:1.05;margin:6px 0 0;letter-spacing:-0.01em;
+  }
+  .block .lead{font-size:19px;max-width:780px;margin:18px 0 0;color:var(--ink-soft);}
+
+  /* ---- matrix table ---- */
+  .matrixscroll{margin:30px 0 0;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table.matrix{width:100%;border-collapse:collapse;min-width:880px;font-family:"Source Serif 4",serif;}
+  table.matrix thead th{
+    font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;
+    color:var(--muted);font-weight:500;text-align:left;
+    padding:0 16px 12px;border-bottom:1px solid var(--ink);vertical-align:bottom;
+  }
+  table.matrix tbody td{
+    padding:18px 16px;border-bottom:1px solid var(--hairline-soft);vertical-align:top;font-size:16px;line-height:1.45;
+  }
+  table.matrix tbody tr{transition:opacity .2s ease;}
+  table.matrix tbody tr.dim{opacity:0.22;}
+  .model-cell{min-width:170px;}
+  .model-name{font-family:"Playfair Display",serif;font-weight:700;font-size:19px;display:flex;align-items:center;gap:9px;}
+  .model-name .ddot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .ddot.nlp{background:var(--nlp);}
+  .ddot.vision{background:var(--vision);}
+  .ddot.tabular{background:var(--tabular);}
+  .model-sub{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:0.06em;color:var(--muted);text-transform:uppercase;margin-top:5px;}
+  .val{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px;color:var(--ink);}
+  .sub{display:block;font-family:"Source Serif 4",serif;font-weight:400;font-size:13px;color:var(--muted);margin-top:3px;font-style:italic;}
+  /* rating bars */
+  .rate{display:inline-flex;gap:3px;align-items:center;margin-bottom:4px;}
+  .rate i{width:9px;height:9px;border-radius:2px;background:var(--hairline);display:inline-block;}
+  .rate i.on{background:var(--ink);}
+  /* source tags */
+  .tag{display:inline-block;font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-top:6px;}
+  .tag.src{background:rgba(62,122,78,.14);color:#2f5e3c;border:1px solid rgba(62,122,78,.35);}
+  .tag.qual{background:rgba(156,43,38,.10);color:var(--oxblood);border:1px solid rgba(156,43,38,.3);}
+  .legend{display:flex;flex-wrap:wrap;gap:18px;margin:18px 0 0;font-size:14px;color:var(--ink-soft);}
+  .legend .tag{margin-top:0;}
+
+  /* ---- analysis cards ---- */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hairline);border:1px solid var(--hairline);margin:30px 0 0;border-radius:12px;overflow:hidden;}
+  .card{background:var(--cream);padding:26px 24px;}
+  .card .axis{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--oxblood);font-weight:700;}
+  .card h3{font-family:"Playfair Display",serif;font-weight:700;font-size:22px;margin:8px 0 10px;}
+  .card p{font-size:15.5px;margin:0;color:var(--ink-soft);line-height:1.5;}
+
+  /* ---- recommendation rows ---- */
+  .recs{margin:26px 0 0;border-top:1px solid var(--ink);}
+  .rec{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:24px 0;border-bottom:1px solid var(--hairline-soft);}
+  .rec .who{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:9px;}
+  .rec .who .ddot{width:9px;height:9px;border-radius:50%;}
+  .rec .pick b{font-family:"Playfair Display",serif;font-weight:700;font-size:19px;color:var(--ink);}
+  .rec .pick p{margin:6px 0 0;font-size:16px;color:var(--ink-soft);}
+
+  /* ---- method / sources ---- */
+  .method p{max-width:820px;}
+  .reflist{margin:24px 0 0;padding:0;list-style:none;font-family:"Source Serif 4",serif;font-size:14.5px;color:var(--ink-soft);}
+  .reflist li{padding:0 0 0 2.2em;text-indent:-2.2em;margin:0 0 14px;line-height:1.5;}
+
+  .callout{background:var(--cream-panel);border-left:3px solid var(--oxblood);border-radius:0 10px 10px 0;padding:20px 24px;margin:26px 0 0;font-family:"Crimson Pro",serif;font-style:italic;font-size:19px;color:var(--ink);line-height:1.5;}
+
+  /* ---- footer ---- */
+  footer.foot{margin:72px 0 0;border-top:1px solid var(--ink);padding:30px 0 70px;}
+  .foot .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px;}
+  .foot .disc{max-width:620px;font-size:13.5px;color:var(--muted);line-height:1.55;}
+  .foot .disc .mono{display:block;margin-bottom:6px;}
+  .foot .sign{font-family:"Playfair Display",serif;font-style:italic;font-size:18px;color:var(--ink);}
+  .placeholder{background:rgba(156,43,38,.08);border:1px dashed var(--oxblood);border-radius:6px;padding:2px 6px;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--oxblood);font-style:normal;}
+
+  /* ---- responsive ---- */
+  @media (max-width:820px){
+    .wrap{padding:0 22px;}
+    .cards{grid-template-columns:1fr;}
+    .rec{grid-template-columns:1fr;gap:8px;}
+    .hero{padding:42px 0 24px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <span class="eyebrow">Portfolio Artifact / Model Selection</span>
+    <span class="vol">Vol. 04 — 2026</span>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>Picking the Right<span class="accent">Pre-Trained Model</span></h1>
+    <p class="dek">Six models, three domains, and the trade-offs between size, accuracy, and speed — a decision matrix for choosing what to actually deploy.</p>
+
+    <div class="statstrip" role="list">
+      <span class="stat" role="listitem"><b>6</b> MODELS</span><span class="sep">·</span>
+      <span class="stat" role="listitem"><b>3</b> DOMAINS</span><span class="sep">·</span>
+      <span class="stat" role="listitem"><b>3</b> CORE AXES</span><span class="sep">·</span>
+      <span class="stat" role="listitem"><b>175B–3.4M</b> PARAM SPAN</span><span class="sep">·</span>
+      <span class="stat" role="listitem"><b>84.3%</b> PEAK TOP-1</span>
+    </div>
+    <hr class="rule" />
+  </div>
+
+  <!-- FILTER -->
+  <div class="filterpanel">
+    <p class="mono ftitle">Filter by Domain</p>
+    <div class="pills" id="pills" role="group" aria-label="Filter the matrix by domain">
+      <button class="pill" data-domain="all" aria-pressed="true"><span class="dot"></span>All Models</button>
+      <button class="pill" data-domain="nlp" aria-pressed="false"><span class="dot"></span>NLP &amp; GenAI</button>
+      <button class="pill" data-domain="vision" aria-pressed="false"><span class="dot"></span>Computer Vision</button>
+      <button class="pill" data-domain="tabular" aria-pressed="false"><span class="dot"></span>Tabular Data</button>
+    </div>
+    <p class="filterhint">Tap a domain to isolate its models · tap “All Models” to show every row.</p>
+  </div>
+
+  <!-- § 01 MATRIX -->
+  <section class="block">
+    <div class="marker"><span class="sig">§ 01</span><span class="label">The Decision Matrix</span></div>
+    <h2>Six models, three axes</h2>
+    <p class="lead">Each model is scored on the three axes the assignment asks for — size, accuracy, and speed — plus interpretability, the consideration that matters most when a decision has to be explained. <strong>Green tags mark exact published figures; oxblood tags mark qualitative characterizations that depend on hardware or dataset.</strong></p>
+
+    <div class="matrixscroll">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Model / Domain</th>
+            <th>Size</th>
+            <th>Accuracy (benchmark)</th>
+            <th>Inference Speed</th>
+            <th>Interpretability</th>
+            <th>Best Fit</th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody">
+
+          <!-- GPT-3 -->
+          <tr data-domain="nlp">
+            <td class="model-cell">
+              <div class="model-name"><span class="ddot nlp"></span>GPT-3</div>
+              <div class="model-sub">NLP / Generative AI</div>
+            </td>
+            <td><span class="val">175B</span><span class="sub">parameters</span><span class="tag src">Sourced</span></td>
+            <td><span class="val">Few-shot, task-dependent</span><span class="sub">strong across many NLP tasks; no single comparable score</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i></i><i></i><i></i><i></i></div><span class="sub">heavy compute / high latency</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i></i><i></i><i></i><i></i></div><span class="sub">opaque</span><span class="tag qual">Characterized</span></td>
+            <td>Open-ended generation, reasoning, chat assistants</td>
+          </tr>
+
+          <!-- BERT -->
+          <tr data-domain="nlp">
+            <td class="model-cell">
+              <div class="model-name"><span class="ddot nlp"></span>BERT-base</div>
+              <div class="model-sub">NLP / Understanding</div>
+            </td>
+            <td><span class="val">110M</span><span class="sub">parameters</span><span class="tag src">Sourced</span></td>
+            <td><span class="val">Strong on GLUE</span><span class="sub">language-understanding benchmark suite</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div><span class="sub">moderate; fine-tunes cheaply</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div><span class="sub">attention is inspectable but not explanatory</span><span class="tag qual">Characterized</span></td>
+            <td>Classification, search, embeddings, sentiment</td>
+          </tr>
+
+          <!-- MobileNetV2 -->
+          <tr data-domain="vision">
+            <td class="model-cell">
+              <div class="model-name"><span class="ddot vision"></span>MobileNetV2</div>
+              <div class="model-sub">Computer Vision</div>
+            </td>
+            <td><span class="val">3.4M</span><span class="sub">parameters</span><span class="tag src">Sourced</span></td>
+            <td><span class="val">72.0%</span><span class="sub">ImageNet top-1</span><span class="tag src">Sourced</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div><span class="sub">built for phones &amp; edge devices</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i></i><i></i><i></i><i></i></div><span class="sub">opaque (CNN)</span><span class="tag qual">Characterized</span></td>
+            <td>On-device / real-time image classification</td>
+          </tr>
+
+          <!-- EfficientNet-B7 -->
+          <tr data-domain="vision">
+            <td class="model-cell">
+              <div class="model-name"><span class="ddot vision"></span>EfficientNet-B7</div>
+              <div class="model-sub">Computer Vision</div>
+            </td>
+            <td><span class="val">66M</span><span class="sub">parameters</span><span class="tag src">Sourced</span></td>
+            <td><span class="val">84.3%</span><span class="sub">ImageNet top-1</span><span class="tag src">Sourced</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div><span class="sub">accuracy-first; slower than B0</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i></i><i></i><i></i><i></i></div><span class="sub">opaque (CNN)</span><span class="tag qual">Characterized</span></td>
+            <td>Server-side vision where accuracy &gt; latency</td>
+          </tr>
+
+          <!-- XGBoost -->
+          <tr data-domain="tabular">
+            <td class="model-cell">
+              <div class="model-name"><span class="ddot tabular"></span>XGBoost</div>
+              <div class="model-sub">Tabular Data</div>
+            </td>
+            <td><span class="val">Varies</span><span class="sub">tree ensemble; no fixed count</span><span class="tag qual">Characterized</span></td>
+            <td><span class="val">Dataset-dependent</span><span class="sub">top performer on many tabular tasks</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><span class="sub">fast inference</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><span class="sub">feature importance + SHAP</span><span class="tag qual">Characterized</span></td>
+            <td>Structured business data, risk scoring</td>
+          </tr>
+
+          <!-- LightGBM -->
+          <tr data-domain="tabular">
+            <td class="model-cell">
+              <div class="model-name"><span class="ddot tabular"></span>LightGBM</div>
+              <div class="model-sub">Tabular Data</div>
+            </td>
+            <td><span class="val">Varies</span><span class="sub">tree ensemble; no fixed count</span><span class="tag qual">Characterized</span></td>
+            <td><span class="val">Dataset-dependent</span><span class="sub">comparable to XGBoost</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div><span class="sub">histogram splits → very fast training</span><span class="tag qual">Characterized</span></td>
+            <td><div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><span class="sub">feature importance + SHAP</span><span class="tag qual">Characterized</span></td>
+            <td>Large tabular datasets, fast iteration</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend">
+      <span><span class="tag src">Sourced</span> &nbsp;exact figure from the model's original paper</span>
+      <span><span class="tag qual">Characterized</span> &nbsp;qualitative — varies by hardware / dataset</span>
+    </div>
+  </section>
+
+  <!-- § 02 ANALYSIS -->
+  <section class="block">
+    <div class="marker"><span class="sig">§ 02</span><span class="label">Reading the Trade-Offs</span></div>
+    <h2>You can't optimize all three at once</h2>
+    <p class="lead">Size, accuracy, and speed pull against each other. The single most important caveat: accuracy is <em>not</em> one number across domains — a 175B language model and a 3.4M vision model are measured on entirely different benchmarks, so the matrix compares them <em>within</em> domain, not across it.</p>
+
+    <div class="cards">
+      <div class="card">
+        <span class="axis">Axis 01 — Size</span>
+        <h3>Parameters cost money</h3>
+        <p>The param span here is roughly 51,000× — from MobileNetV2's 3.4M to GPT-3's 175B. More parameters generally buy capability, but they also raise memory, latency, and serving cost. Tabular ensembles sidestep the param race entirely.</p>
+      </div>
+      <div class="card">
+        <span class="axis">Axis 02 — Accuracy</span>
+        <h3>Benchmarks don't transfer</h3>
+        <p>ImageNet top-1, GLUE, and tabular AUC live in separate worlds. EfficientNet-B7's 84.3% says nothing about GPT-3's usefulness. Always read accuracy against the benchmark that matches the task — never as a universal score.</p>
+      </div>
+      <div class="card">
+        <span class="axis">Axis 03 — Speed</span>
+        <h3>Speed is a deployment choice</h3>
+        <p>MobileNetV2 and LightGBM are fast because they were designed for constrained settings. Latency is hardware- and batch-dependent, which is why every speed rating here is flagged as characterized, not measured.</p>
+      </div>
+    </div>
+
+    <div class="callout">The fourth axis — interpretability — is where the domains separate most sharply. Tree ensembles can explain a prediction with feature importance and SHAP values; deep networks largely cannot. When a model's output must be justified to a regulator or a stakeholder, that gap often outweighs a few accuracy points.</div>
+  </section>
+
+  <!-- § 03 RECOMMENDATIONS -->
+  <section class="block">
+    <div class="marker"><span class="sig">§ 03</span><span class="label">Recommendations by Domain</span></div>
+    <h2>What to pick, and when</h2>
+
+    <div class="recs">
+      <div class="rec">
+        <div class="who"><span class="ddot nlp"></span>NLP / GenAI</div>
+        <div class="pick">
+          <b>GPT-3 for generation · BERT-base for understanding</b>
+          <p>Reach for a generative model only when you actually need open-ended text. For classification, search, or embeddings, BERT-base delivers most of the value at a fraction of the size and is far cheaper to fine-tune and serve.</p>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="who"><span class="ddot vision"></span>Vision</div>
+        <div class="pick">
+          <b>MobileNetV2 on the edge · EfficientNet-B7 on the server</b>
+          <p>The choice is purely deployment context. If it runs on a phone or in real time, the 3.4M-param model wins. If it runs in a data center and accuracy is the priority, spend the extra parameters on B7's 84.3%.</p>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="who"><span class="ddot tabular"></span>Tabular</div>
+        <div class="pick">
+          <b>LightGBM to move fast · XGBoost as the proven default</b>
+          <p>For structured data, gradient-boosted trees usually beat deep learning while staying explainable. LightGBM trains faster on large data; XGBoost is the battle-tested baseline. Either gives you SHAP-based explanations out of the box.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- § 04 METHOD -->
+  <section class="block method">
+    <div class="marker"><span class="sig">§ 04</span><span class="label">Method &amp; Sources</span></div>
+    <h2>How these figures were gathered</h2>
+    <p class="lead">Models were chosen to span all three domains the assignment names, with at least two per domain to make within-domain comparison meaningful. Parameter counts and ImageNet top-1 accuracy are taken directly from each model's original publication. Speed, interpretability, and tabular accuracy are qualitative characterizations drawn from those same sources and standard practice — they are flagged distinctly because they have no single comparable benchmark value.</p>
+
+    <ul class="reflist">
+      <li>Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., … Amodei, D. (2020). <em>Language models are few-shot learners</em> [GPT-3]. arXiv:2005.14165.</li>
+      <li>Devlin, J., Chang, M.-W., Lee, K., &amp; Toutanova, K. (2019). <em>BERT: Pre-training of deep bidirectional transformers for language understanding</em>. Proceedings of NAACL-HLT 2019. arXiv:1810.04805.</li>
+      <li>Sandler, M., Howard, A., Zhu, M., Zhmoginov, A., &amp; Chen, L.-C. (2018). <em>MobileNetV2: Inverted residuals and linear bottlenecks</em>. Proceedings of CVPR 2018. arXiv:1801.04381.</li>
+      <li>Tan, M., &amp; Le, Q. V. (2019). <em>EfficientNet: Rethinking model scaling for convolutional neural networks</em>. Proceedings of ICML 2019. arXiv:1905.11946.</li>
+      <li>Chen, T., &amp; Guestrin, C. (2016). <em>XGBoost: A scalable tree boosting system</em>. Proceedings of KDD 2016. arXiv:1603.02754.</li>
+      <li>Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., … Liu, T.-Y. (2017). <em>LightGBM: A highly efficient gradient boosting decision tree</em>. Advances in Neural Information Processing Systems 30.</li>
+    </ul>
+
+    <div class="callout">A note on integrity: figures marked <span style="font-style:normal;font-family:'JetBrains Mono',monospace;font-size:13px;color:#2f5e3c;">Sourced</span> are exact values from the papers above. Figures marked <span style="font-style:normal;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--oxblood);">Characterized</span> are descriptive — they depend on hardware, dataset, or task and should not be cited as fixed benchmarks.</div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="row">
+      <div class="disc">
+        <span class="mono">AI-Use Disclosure</span>
+        <span class="placeholder">[Adapt before submitting]</span> Portions of this artifact — the decision-matrix structure, draft analysis, and HTML implementation — were developed with the assistance of a generative AI tool. All published figures were verified against the primary sources listed in § 04, and the final selections, recommendations, and reflection are my own.
+      </div>
+      <div class="sign">
+        Nicole — IWU Machine Learning Foundations<br />
+        <span class="mono" style="text-transform:none;">nicoolesy.github.io · Vol. 04</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var pills = document.querySelectorAll('.pill');
+    var rows = document.querySelectorAll('#matrixBody tr');
+
+    function setActive(domain){
+      pills.forEach(function(p){
+        p.setAttribute('aria-pressed', p.dataset.domain === domain ? 'true' : 'false');
+      });
+      rows.forEach(function(r){
+        if(domain === 'all' || r.dataset.domain === domain){
+          r.classList.remove('dim');
+        } else {
+          r.classList.add('dim');
+        }
+      });
+    }
+
+    pills.forEach(function(p){
+      p.addEventListener('click', function(){ setActive(p.dataset.domain); });
+      p.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setActive(p.dataset.domain); }
+      });
+    });
+  })();
+</script>
+</body>
+</html>
