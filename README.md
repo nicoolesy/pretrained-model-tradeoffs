@@ -5,6 +5,21 @@ A single-page, interactive infographic comparing **six pre-trained models** acro
 that actually govern deployment: **size, accuracy, and speed**, plus interpretability,
 The consideration that matters most when a decision has to be explained.
 
+## About Me
+I'm Nicole, a graduate student at Indiana Wesleyan University, building a portfolio that 
+treats machine learning as a field with real stakes. My interests sit at the intersection of AI safety,
+alignment, responsible AI, and interpretability: I'm less interested in squeezing out the
+last accuracy point than in understanding why a model behaves the way it does and whether
+we can trust and explain it.
+
+This portfolio pairs technical work with clear communication. Each artifact is published as
+a self-contained, accessible web page in a consistent editorial style, because I think being
+able to explain a model is as much a skill as being able to build one. This piece reflects 
+that: it's as much about how to reason about trade-offs honestly as it is about the models themselves.
+
+
+
+
 🔗 **Live page:** [View it here](https://nicoolesy.github.io/pretrained-model-tradeoffs/)
 
 ---
