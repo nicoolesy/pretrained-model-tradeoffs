@@ -1,15 +1,11 @@
-# Picking the Right Pre-Trained Model — A Decision Matrix
-
-**Portfolio Artifact · Vol. 04 · 2026**
-IWU Machine Learning Foundations — Professional Portfolio component
+# Picking the Right Pre-Trained Model
 
 A single-page, interactive infographic comparing **six pre-trained models** across
 **three domains** (NLP/Generative AI, Computer Vision, Tabular Data) on the trade-offs
-that actually govern deployment: **size, accuracy, and speed** — plus interpretability,
-the consideration that matters most when a decision has to be explained.
+that actually govern deployment: **size, accuracy, and speed**, plus interpretability,
+The consideration that matters most when a decision has to be explained.
 
 🔗 **Live page:** `https://nicoolesy.github.io/pretrained-model-tradeoffs/`
-*(update path if you place it in a different repo)*
 
 ---
 
@@ -94,27 +90,4 @@ supports the assignment's emphasis on explainability and honest methodology, and
 | Reflection on Learning | *to be added by you — see checklist* |
 | Writing Quality | concise editorial copy throughout |
 
----
 
-## Deploy to GitHub Pages
-
-1. Create a repo named `pretrained-model-tradeoffs` (or add to an existing one).
-2. Add `index.html` and `README.md` to the repo root.
-3. **Settings → Pages → Source:** deploy from `main` / root (`/`).
-4. Your page goes live at `https://<your-username>.github.io/pretrained-model-tradeoffs/`.
-5. Link it from your main portfolio (`nicoolesy.github.io`) as a new artifact, and submit that link in Brightspace so your instructor can view it.
-
----
-
-## ✅ Before you submit
-
-- [ ] Replace the **AI-use disclosure** placeholder (footer of `index.html`) with your adapted wording.
-- [ ] Replace the placeholder **name/sign-off** in the footer with your details.
-- [ ] Write your own **Reflection on Learning** — the rubric awards genuine voice (9 pts). *This is the one section AI should not draft for you; the matrix and analysis are scaffolding, the reflection is yours.*
-- [ ] Confirm the **live GitHub Pages link works** and is visible to your instructor.
-- [ ] Add this artifact's link + a short project description to your **main portfolio** (About Me / Work Samples / Skills sections).
-- [ ] Submit the **explanatory document** the assignment requires alongside the graphic — I can generate this as an APA-formatted `.docx` if you want it next.
-
----
-
-*Vol. 04 of the IWU ML Foundations portfolio series · cream-and-oxblood editorial system.*
